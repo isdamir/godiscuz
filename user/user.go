@@ -2,10 +2,10 @@
 package user
 
 import (
-	"discuz"
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/iyf/godiscuz/discuz"
 	"strconv"
 	"strings"
 )
@@ -129,9 +129,10 @@ type UserInfo struct {
 func Get(username string, isuid int, args ...string) (userId int, st []string, err error) {
 	arg := fmt.Sprintf("username=%s&isuid=%v", username, isuid)
 	data := discuz.ApiPost("user", "get_user", arg, args...)
+	data = strings.Replace(data, "ISO-8859-1", "utf-8", -1) //有中文竟然还说自己是ISO-8859-1,我操,害我研究半天...不遵守规则的,我操
 	dst := UserInfo{}
 	d := xml.NewDecoder(strings.NewReader(data))
-	d.CharsetReader = discuz.CharsetReader
+	//d.CharsetReader = discuz.CharsetReader
 	err = d.Decode(&dst)
 	if err == nil {
 		userId, err = strconv.Atoi(dst.Data[0])

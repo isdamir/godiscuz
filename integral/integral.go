@@ -2,9 +2,9 @@
 package integral
 
 import (
-	"discuz"
 	"errors"
 	"fmt"
+	"github.com/iyf/godiscuz/discuz"
 	"strconv"
 )
 
