@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -28,18 +27,26 @@ var API_RETURN_SUCCEED int = 1
 //k:Key
 //url:UCenter所在的URL
 //listen:例如uc,那么在ucenter中的应用接口名称就必须是uc
-func Register(id, k, url string, listen string) {
+func Register(id, k, url string) {
 	Appid = id
 	uckey = k
 	UCenterUrl = url
 	//激活当前目标的所有代理
-	http.HandleFunc("/api/"+listen, say)
 }
-func say(w http.ResponseWriter, r *http.Request) {
+
+type Handler struct {
+}
+
+func (this *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	server(w, r)
+}
+func DiscuzHandler(w http.ResponseWriter, r *http.Request) {
+	server(w, r)
+}
+func server(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm() //解析参数，默认是不会解析的
 	if v := r.FormValue("code"); v != "" {
 		ac := DiscuzDecode(v)
-		log.Println(ac)
 		val, err := url.ParseQuery(ac)
 		if err == nil {
 			switch val.Get("action") {
@@ -52,7 +59,7 @@ func say(w http.ResponseWriter, r *http.Request) {
 					if bindLogin != nil {
 						v, err := strconv.Atoi(val.Get("uid"))
 						if err == nil {
-							bindLogin(v, w)
+							bindLogin(v, w, r)
 						}
 					}
 				}
@@ -236,10 +243,10 @@ func BindDeleteUser(sum func(userId []string) bool) {
 	bindDeleteUser = sum
 }
 
-var bindLogin func(userId int, w http.ResponseWriter) bool
+var bindLogin func(userId int, w http.ResponseWriter, r *http.Request) bool
 
 //注册同步登陆处理方法
-func BindLogin(sum func(userId int, w http.ResponseWriter) bool) {
+func BindLogin(sum func(userId int, w http.ResponseWriter, r *http.Request) bool) {
 	bindLogin = sum
 }
 

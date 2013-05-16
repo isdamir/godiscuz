@@ -22,6 +22,8 @@ func ExchangeRequest(uid, from, to, toappid, amount int, args ...string) (err er
 		if i == 0 {
 			err = errors.New("请求失败")
 		}
+	} else {
+		err = fmt.Errorf("请求错误：", err)
 	}
 	return
 }
